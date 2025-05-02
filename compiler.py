@@ -22,7 +22,7 @@ class OutputPaths:
     def create(cls, base_path: Path) -> 'OutputPaths':
         """Create output directories and return paths"""
         paths = cls(
-            gfx_dir=base_path / 'gfx' / 'bori',
+            gfx_dir=base_path / 'gfx' / 'bori_love',
             xml_dir=base_path / 'xml_resources',
             bin_dir=base_path / 'xml_bin'
         )
