@@ -6,6 +6,18 @@ from processor import AnimationType
 from builder import AnimationConfig
 from preview import PreviewWindow
 from typing import Callable, Dict, Optional, List
+import requests
+
+CONFIG_URL = "https://raw.githubusercontent.com/mlnitoon2/MSM-Config/refs/heads/main/anim_maker_config.json"
+
+def fetch_config_json():
+    try:
+        response = requests.get(CONFIG_URL)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to load config JSON:\n{e}")
+        return None
 
 class AnimationCache:
     """Cache for loaded animation frames"""
@@ -493,6 +505,13 @@ class AnimationUI:
         )
         self.process_btn.pack(pady=10)
 
+        self.credits_btn = ttk.Button(
+            main_frame, text="Credits",
+            command=self._credits
+        )
+        self.credits_btn.pack(pady=10)
+
+
     def _browse_output(self):
         folder = filedialog.askdirectory()
         if folder:
@@ -516,6 +535,23 @@ class AnimationUI:
 
         # Signal that we're ready to process
         self.window.event_generate('<<ProcessAnimations>>')
+
+    def show_credits_window():
+        config = fetch_config_json()
+        if not config or "credits" not in config:
+            return
+    
+        credits = config["credits"]
+    
+        credits_win = Toplevel()
+        credits_win.title("Credits")
+        credits_win.geometry("300x200")
+    
+        listbox = Listbox(credits_win)
+        listbox.pack(fill="both", expand=True, padx=10, pady=10)
+    
+        for line in credits:
+            listbox.insert(tk.END, line)
 
     def run(self):
         self.window.mainloop()
