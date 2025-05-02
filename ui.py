@@ -1,5 +1,3 @@
-# UNUSED
-
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 from pathlib import Path
@@ -248,3 +246,96 @@ class AnimationTable(ctk.CTkFrame):
 
     def get_configs(self) -> List[AnimationConfig]:
         return [entry.get_config() for entry in self.entries if entry.get_config()]
+
+class AnimationUI:
+    """Main application window"""
+    def __init__(self):
+        self.window = tk.Tk()
+        self.window.title("Animation Manager")
+        self.window.geometry("800x600")
+        
+        self._setup_ui()
+
+    def _setup_ui(self):
+        # Main container
+        main_frame = ttk.Frame(self.window, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Animation table
+        self.table = AnimationTable(main_frame)
+        self.table.pack(fill=tk.BOTH, expand=True)
+
+        # Output settings
+        settings_frame = ttk.LabelFrame(main_frame, text="Output Settings", 
+                                      padding="5")
+        settings_frame.pack(fill=tk.X, pady=(10, 0))
+
+        # Common name for layers
+        common_frame = ttk.Frame(settings_frame)
+        common_frame.pack(fill=tk.X, pady=2)
+        self.common_name_var = tk.StringVar()
+        ttk.Label(common_frame, text="Common Name:").pack(side=tk.LEFT)
+        ttk.Entry(common_frame, textvariable=self.common_name_var).pack(
+            side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+
+        # Bin file name
+        bin_frame = ttk.Frame(settings_frame)
+        bin_frame.pack(fill=tk.X, pady=2)
+        self.bin_name_var = tk.StringVar()
+        ttk.Label(bin_frame, text="Bin File Name:").pack(side=tk.LEFT)
+        ttk.Entry(bin_frame, textvariable=self.bin_name_var).pack(
+        side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+
+        # Output folder
+        folder_frame = ttk.Frame(settings_frame)
+        folder_frame.pack(fill=tk.X)
+        
+        self.output_var = tk.StringVar()
+        ttk.Label(folder_frame, text="Output Folder:").pack(side=tk.LEFT)
+        ttk.Entry(folder_frame, textvariable=self.output_var).pack(
+            side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+        ttk.Button(folder_frame, text="Browse", 
+                  command=self._browse_output).pack(side=tk.LEFT, padx=(5, 0))
+
+        # Process button
+        self.process_btn = ttk.Button(
+            main_frame, text="Process Animations",
+            command=self._process
+        )
+        self.process_btn.pack(pady=10)
+
+    def _browse_output(self):
+        folder = filedialog.askdirectory()
+        if folder:
+            self.output_var.set(folder)
+
+    def _process(self):
+        configs = self.table.get_configs()
+        if not configs:
+            return
+
+        output = self.output_var.get().strip()
+        if not output:
+            messagebox.showerror("Error", "No output folder specified")
+            return
+        if not Path(output).exists():
+            if messagebox.askyesno("Create Folder", 
+                                 "Output folder doesn't exist. Create it?"):
+                Path(output).mkdir(parents=True)
+            else:
+                return
+
+        # Signal that we're ready to process
+        self.window.event_generate('<<ProcessAnimations>>')
+
+    def run(self):
+        self.window.mainloop()
+
+    def get_output_path(self) -> Optional[Path]:
+        """Get the selected output path"""
+        path = self.output_var.get().strip()
+        return Path(path) if path else None
+
+    def get_configs(self) -> Dict[str, AnimationConfig]:
+        """Get all animation configurations"""
+        return self.table.get_configs()
