@@ -49,7 +49,7 @@ class AnimationCache:
 
 class AnimationEntry:
     """Represents a row in the animation table"""
-    def __init__(self, parent: ctk.CTkFrame, row: int,
+    def __init__(self, parent: ttk.Frame, row: int, 
                  on_update: Callable, on_delete: Callable,
                  animation_cache: AnimationCache):
         self.parent = parent
@@ -59,85 +59,138 @@ class AnimationEntry:
         self.animation_cache = animation_cache
         self.frames: List[Image.Image] = []
 
-        # Initializing StringVar for various settings
-        self.name_var = ctk.StringVar()
-        self.type_var = ctk.StringVar(value=AnimationType.FOLDER.name)
-        self.source_var = ctk.StringVar()
-        self.fps_var = ctk.StringVar(value="30")
-        self.target_var = ctk.StringVar()
-        self.position_x_var = ctk.StringVar(value="0")
-        self.position_y_var = ctk.StringVar(value="-70")
-        self.scale_var = ctk.StringVar(value="100")
-
+        self.name_var = tk.StringVar()
+        self.type_var = tk.StringVar(value=AnimationType.FOLDER.name)
+        self.source_var = tk.StringVar()
+        self.fps_var = tk.StringVar(value="30")
+        self.target_var = tk.StringVar()
+        self.position_x_var = tk.StringVar(value="0")  # Default to 5
+        self.position_y_var = tk.StringVar(value="-70")
+        self.scale_var = tk.StringVar(value="100")
+        
         self._create_widgets()
         self._setup_bindings()
 
     def _create_widgets(self):
         # Name entry
-        self.name_entry = ctk.CTkEntry(self.parent, textvariable=self.name_var)
-        self.name_entry.grid(row=self.row, column=0, padx=5, pady=5, sticky='ew')
+        self.name_entry = ttk.Entry(
+            self.parent, textvariable=self.name_var, width=20
+        )
+        self.name_entry.grid(row=self.row, column=0, padx=2, pady=2, sticky='ew')
 
         # Type combobox
-        self.type_combo = ctk.CTkComboBox(self.parent, values=[t.name for t in AnimationType],
-                                          textvariable=self.type_var)
-        self.type_combo.grid(row=self.row, column=1, padx=5, pady=5, sticky='ew')
+        self.type_combo = ttk.Combobox(
+            self.parent, 
+            textvariable=self.type_var,
+            values=[t.name for t in AnimationType],
+            state='readonly',
+            width=15
+        )
+        self.type_combo.grid(row=self.row, column=1, padx=2, pady=2, sticky='ew')
 
-        # Source frame setup
-        self.source_frame = ctk.CTkFrame(self.parent)
-        self.source_frame.grid(row=self.row, column=2, padx=5, pady=5, sticky='ew')
+        # Source frame
+        self.source_frame = ttk.Frame(self.parent)
+        self.source_frame.grid(row=self.row, column=2, padx=2, pady=2, sticky='ew')
 
-        # Path entry & browse button
-        self.path_entry = ctk.CTkEntry(self.source_frame, textvariable=self.source_var)
-        self.browse_btn = ctk.CTkButton(self.source_frame, text="Browse", command=self._browse_folder)
-        self.path_entry.grid(row=0, column=0, sticky='ew', padx=(5, 0))
-        self.browse_btn.grid(row=0, column=1, padx=5)
+        # Source path entry and browse button
+        self.path_entry = ttk.Entry(
+            self.source_frame, textvariable=self.source_var
+        )
+        self.browse_btn = ttk.Button(
+            self.source_frame, text="Browse", command=self._browse_folder
+        )
+
+        # Target animation combobox
+        self.target_combo = ttk.Combobox(
+            self.source_frame, 
+            textvariable=self.target_var,
+            state='readonly'
+        )
 
         # FPS entry
-        self.fps_entry = ctk.CTkEntry(self.parent, textvariable=self.fps_var, width=10)
-        self.fps_entry.grid(row=self.row, column=3, padx=5, pady=5, sticky='ew')
+        self.fps_entry = ttk.Entry(
+            self.parent, textvariable=self.fps_var, width=8
+        )
+        self.fps_entry.grid(row=self.row, column=3, padx=2, pady=2, sticky='ew')
+
+
 
         # Frame count label
-        self.frame_count = ctk.CTkLabel(self.parent, text="0 frames")
-        self.frame_count.grid(row=self.row, column=4, padx=5, pady=5)
+        self.frame_count = ttk.Label(self.parent, text="0 frames")
+        self.frame_count.grid(row=self.row, column=4, padx=2, pady=2)
 
         # Preview button
-        self.preview_btn = ctk.CTkButton(self.parent, text="Preview", command=self._show_preview)
-        self.preview_btn.grid(row=self.row, column=5, padx=5, pady=5)
+        self.preview_btn = ttk.Button(
+            self.parent, text="P", width=3,
+            command=self._show_preview
+        )
+        self.preview_btn.grid(row=self.row, column=5, padx=2, pady=2)
 
         # Delete button
-        self.delete_btn = ctk.CTkButton(self.parent, text="❌", command=lambda: self.on_delete(self))
-        self.delete_btn.grid(row=self.row, column=6, padx=5, pady=5)
-
-        # Position and scale settings
-        self._setup_position_scale_widgets()
-
-    def _setup_position_scale_widgets(self):
-        position_frame = ctk.CTkFrame(self.parent)
-        position_frame.grid(row=self.row, column=4, padx=5, pady=5)
-
-        # X Position
-        self.position_x_entry = ctk.CTkEntry(position_frame, textvariable=self.position_x_var, width=5)
-        self.position_x_entry.grid(row=0, column=0, padx=5)
-
-        # Y Position
-        self.position_y_entry = ctk.CTkEntry(position_frame, textvariable=self.position_y_var, width=5)
-        self.position_y_entry.grid(row=0, column=1, padx=5)
+        self.delete_btn = ttk.Button(
+            self.parent, text="❌", width=3,
+            command=lambda: self.on_delete(self)
+        )
+        self.delete_btn.grid(row=self.row, column=6, padx=2, pady=2)
+        # Replace offset entry with X/Y position entries
+        position_frame = ttk.Frame(self.parent)
+        position_frame.grid(row=self.row, column=4, padx=2, pady=2)
+        
+        # X position
+        ttk.Label(position_frame, text="X:").grid(row=0, column=0, padx=(5,0))
+        self.position_x_entry = ttk.Entry(
+            position_frame,
+            textvariable=self.position_x_var,
+            width=5
+        )
+        self.position_x_entry.grid(row=0, column=1, padx=2)
+        
+        # Y position
+        ttk.Label(position_frame, text="Y:").grid(row=0, column=2, padx=(5,0))
+        self.position_y_entry = ttk.Entry(
+            position_frame,
+            textvariable=self.position_y_var,
+            width=5
+        )
+        self.position_y_entry.grid(row=0, column=3, padx=2)
 
         # Scale
-        self.scale_entry = ctk.CTkEntry(position_frame, textvariable=self.scale_var, width=5)
-        self.scale_entry.grid(row=0, column=2, padx=5)
+        ttk.Label(position_frame, text="Scale %:").grid(row=0, column=4, padx=(5,0))
+        self.scale_entry = ttk.Entry(
+            position_frame,
+            textvariable=self.scale_var,
+            width=5
+        )
+        self.scale_entry.grid(row=0, column=5, padx=2)
+
+        # Update frame count and other widgets positions
+        self.frame_count.grid(row=self.row, column=5, padx=2, pady=2)
+        self.preview_btn.grid(row=self.row, column=6, padx=2, pady=2)
+        self.delete_btn.grid(row=self.row, column=7, padx=2, pady=2)
+
+        self._update_source_widgets()
 
     def _setup_bindings(self):
-        self.type_combo.bind('<<ComboboxSelected>>', lambda _: self._update_source_widgets())
-        for var in [self.name_var, self.type_var, self.source_var, self.fps_var, self.target_var, 
-                    self.position_x_var, self.position_y_var, self.scale_var]:
-            var.trace_add('write', lambda *_: self._on_change())
+        self.type_combo.bind('<<ComboboxSelected>>', 
+                           lambda _: self._update_source_widgets())
+        self.name_var.trace_add('write', lambda *_: self._on_change())
+        self.type_var.trace_add('write', lambda *_: self._on_change())
+        self.source_var.trace_add('write', lambda *_: self._on_change())
+        self.fps_var.trace_add('write', lambda *_: self._on_change())
+        self.target_var.trace_add('write', lambda *_: self._on_change())
+        self.position_x_var.trace_add('write', lambda *_: self._on_change())
+        self.position_y_var.trace_add('write', lambda *_: self._on_change())
+        self.scale_var.trace_add('write', lambda *_: self._on_change())
 
     def _browse_folder(self):
         folder = filedialog.askdirectory()
         if folder:
             self.source_var.set(folder)
-            frames = self.animation_cache.load_if_needed(self.name_var.get().strip(), folder)
+            # Attempt to load frames immediately
+            frames = self.animation_cache.load_if_needed(
+                self.name_var.get().strip(),
+                folder
+            )
             self.frame_count.configure(text=f"{len(frames)} frames")
 
     def _update_source_widgets(self):
@@ -145,11 +198,14 @@ class AnimationEntry:
             widget.grid_remove()
 
         anim_type = AnimationType[self.type_var.get()]
+        
         if anim_type == AnimationType.FOLDER:
             self.path_entry.grid(row=0, column=0, sticky='ew')
-            self.browse_btn.grid(row=0, column=1, padx=5)
+            self.browse_btn.grid(row=0, column=1, padx=(2, 0))
+            self.source_frame.grid_columnconfigure(0, weight=1)
         else:
-            pass
+            self.target_combo.grid(row=0, column=0, sticky='ew')
+            self.source_frame.grid_columnconfigure(0, weight=1)
 
     def _show_preview(self):
         """Show animation preview window"""
@@ -161,92 +217,225 @@ class AnimationEntry:
             messagebox.showerror("Error", "Invalid FPS value")
             return
 
+        # If we already have frames, use them
         if self.frames:
             PreviewWindow(self.parent.winfo_toplevel(), self.frames, fps)
             return
 
-        folder_path = self.source_var.get().strip()
-        if not folder_path:
-            messagebox.showerror("Error", "No folder specified")
-            return
-
-        frames = self.animation_cache.load_if_needed(self.name_var.get().strip(), folder_path)
-        if not frames:
-            messagebox.showerror("Error", "No frames found in folder")
-            return
-
-        self.frames = frames
-        self.frame_count.configure(text=f"{len(frames)} frames")
-        PreviewWindow(self.parent.winfo_toplevel(), frames, fps)
+        # Otherwise try to load frames based on type
+        anim_type = AnimationType[self.type_var.get()]
+        
+        if anim_type == AnimationType.FOLDER:
+            # Try to load from folder
+            folder_path = self.source_var.get().strip()
+            if not folder_path:
+                messagebox.showerror("Error", "No folder specified")
+                return
+                
+            frames = self.animation_cache.load_if_needed(
+                self.name_var.get().strip(),
+                folder_path
+            )
+            if not frames:
+                messagebox.showerror("Error", "No frames found in folder")
+                return
+                
+            self.frames = frames
+            self.frame_count.configure(text=f"{len(frames)} frames")
+            PreviewWindow(self.parent.winfo_toplevel(), frames, fps)
+            
+        elif anim_type == AnimationType.COPY:
+            # Get frames from reference animation
+            ref_name = self.target_var.get().strip()
+            if not ref_name:
+                messagebox.showerror("Error", "No reference animation selected")
+                return
+                
+            frames = self.animation_cache.get_frames(ref_name)
+            if not frames:
+                messagebox.showerror("Error", "No frames available for reference animation")
+                return
+                
+            PreviewWindow(self.parent.winfo_toplevel(), frames, fps)
+            
+        else:  # FIRST_FRAME
+            # Get first frame from reference animation
+            ref_name = self.target_var.get().strip()
+            if not ref_name:
+                messagebox.showerror("Error", "No reference animation selected")
+                return
+                
+            frames = self.animation_cache.get_frames(ref_name, first_frame_only=True)
+            if not frames:
+                messagebox.showerror("Error", "No frames available for reference animation")
+                return
+                
+            PreviewWindow(self.parent.winfo_toplevel(), frames, fps)
 
     def _on_change(self):
         self.on_update(self)
 
+    def set_frames(self, frames: List[Image.Image]) -> None:
+        """Set frames for preview"""
+        self.frames = frames
+        self.frame_count.configure(text=f"{len(frames)} frames")
+
     def get_config(self) -> Optional[AnimationConfig]:
+        """Get animation configuration from current values"""
         name = self.name_var.get().strip()
         if not name:
             return None
 
         try:
             fps = float(self.fps_var.get())
+            if fps <= 0:
+                raise ValueError("FPS must be positive")
+            
             position_x = float(self.position_x_var.get())
             position_y = float(self.position_y_var.get())
+
             scale = float(self.scale_var.get())
+
         except ValueError as e:
-            messagebox.showerror("Error", f"Invalid value: {e}")
+            messagebox.showerror("Error", f"Invalid value for {name}: {str(e)}")
             return None
 
         anim_type = AnimationType[self.type_var.get()]
+        
         if anim_type == AnimationType.FOLDER:
             source_path = self.source_var.get().strip()
-            if not source_path or not Path(source_path).is_dir():
-                messagebox.showerror("Error", f"Invalid source folder: {source_path}")
+            if not source_path:
+                messagebox.showerror("Error", f"No source folder specified for {name}")
                 return None
-            return AnimationConfig(name=name, type=anim_type, source_path=source_path,
-                                   fps=fps, position_x=position_x, position_y=position_y, scale=scale)
+            if not Path(source_path).is_dir():
+                messagebox.showerror("Error", f"Invalid source folder for {name}")
+                return None
+            
+            return AnimationConfig(
+                name=name,
+                type=anim_type,
+                source_path=source_path,
+                fps=fps,
+                position_x=position_x,
+                position_y=position_y,
+                scale=scale
+            )
+        else:
+            ref_anim = self.target_var.get()
+            if not ref_anim:
+                messagebox.showerror("Error", 
+                                f"No reference animation specified for {name}")
+                return None
+            
+            return AnimationConfig(
+                name=name,
+                type=anim_type,
+                reference_anim=ref_anim,
+                fps=fps,
+                position_x=position_x,
+                position_y=position_y,
+                scale=scale
+            )
 
-        ref_anim = self.target_var.get()
-        if not ref_anim:
-            messagebox.showerror("Error", "No reference animation specified")
-            return None
+    def update_target_animations(self, animations: list[str]):
+        """Update available target animations in the combobox"""
+        current = self.target_var.get()
+        self.target_combo['values'] = animations
+        if current in animations:
+            self.target_var.set(current)
+        elif animations:
+            self.target_var.set(animations[0])
+        else:
+            self.target_var.set('')
 
-        return AnimationConfig(name=name, type=anim_type, reference_anim=ref_anim, 
-                               fps=fps, position_x=position_x, position_y=position_y, scale=scale)
 
-
-class AnimationTable(ctk.CTkFrame):
+class AnimationTable(ttk.Frame):
     """Main animation table widget"""
     def __init__(self, parent):
         super().__init__(parent)
         self.animation_cache = AnimationCache()
-        self.entries = []
+        self.entries: list[AnimationEntry] = []
         self._setup_ui()
 
     def _setup_ui(self):
+        # Headers
         headers = ['Name', 'Type', 'Source/Target', 'FPS', 'Offset', 'Count', 'Preview', '']
         for i, header in enumerate(headers):
-            label = ctk.CTkLabel(self, text=header, font=('Arial', 12, 'bold'))
-            label.grid(row=0, column=i, padx=5, pady=5)
+            label = ttk.Label(self, text=header, font=('TkDefaultFont', 10, 'bold'))
+            label.grid(row=0, column=i, padx=2, pady=(0, 5), sticky='w')
 
-        self.add_button = ctk.CTkButton(self, text="Add Animation", command=self._add_entry)
-        self.add_button.grid(row=1, columnspan=8, pady=10)
+        # Add button
+        self.add_btn = ttk.Button(
+            self, text="Add Animation", command=self._add_entry
+        )
+        self.add_btn.grid(row=99, column=0, columnspan=2, pady=10, sticky='w')
+
+        # Configure grid
+        self.grid_columnconfigure(2, weight=1)  # Source column expands
 
     def _add_entry(self):
-        entry = AnimationEntry(self, len(self.entries) + 1, self._on_update, self._on_delete, self.animation_cache)
-        entry.grid(row=len(self.entries) + 1, column=0, columnspan=8, padx=5, pady=5, sticky='ew')
+        """Add a new animation entry"""
+        row = len(self.entries) + 1
+        entry = AnimationEntry(
+            self, row,
+            on_update=self._update_references,
+            on_delete=self._delete_entry,
+            animation_cache=self.animation_cache
+        )
         self.entries.append(entry)
+        self._update_references()
 
-    def _on_update(self, entry: AnimationEntry):
-        # Handle any updates on the entries
-        pass
-
-    def _on_delete(self, entry: AnimationEntry):
-        # Remove entry from the UI
-        entry.destroy()
+    def _delete_entry(self, entry: AnimationEntry):
+        """Delete an animation entry"""
         self.entries.remove(entry)
+        # Destroy widgets
+        entry.name_entry.destroy()
+        entry.type_combo.destroy()
+        entry.source_frame.destroy()
+        entry.fps_entry.destroy()
+        entry.frame_count.destroy()
+        entry.preview_btn.destroy()
+        entry.delete_btn.destroy()
+        # Reposition remaining entries
+        for i, e in enumerate(self.entries, start=1):
+            e.row = i
+            e.name_entry.grid(row=i)
+            e.type_combo.grid(row=i)
+            e.source_frame.grid(row=i)
+            e.fps_entry.grid(row=i)
+            e.frame_count.grid(row=i)
+            e.preview_btn.grid(row=i)
+            e.delete_btn.grid(row=i)
+        self._update_references()
 
-    def get_configs(self) -> List[AnimationConfig]:
-        return [entry.get_config() for entry in self.entries if entry.get_config()]
+    def _update_references(self, _=None):
+        """Update available reference animations in all entries"""
+        folder_anims = [e.name_var.get() for e in self.entries 
+                       if e.type_var.get() == AnimationType.FOLDER.name 
+                       and e.name_var.get().strip()]
+        
+        for entry in self.entries:
+            if entry.type_var.get() != AnimationType.FOLDER.name:
+                entry.update_target_animations(folder_anims)
+
+    def get_entry(self, name: str) -> Optional[AnimationEntry]:
+        """Get entry by animation name"""
+        return next((e for e in self.entries 
+                    if e.name_var.get().strip() == name), None)
+
+    def get_configs(self) -> Dict[str, AnimationConfig]:
+        """Get all valid animation configurations"""
+        configs = {}
+        for entry in self.entries:
+            config = entry.get_config()
+            if config:
+                if config.name in configs:
+                    messagebox.showerror(
+                        "Error", f"Duplicate animation name: {config.name}")
+                    return {}
+                configs[config.name] = config
+        return configs
+
 
 class AnimationUI:
     """Main application window"""
