@@ -109,7 +109,7 @@ class AnimationBuilder:
         size = self.target_size
         
         layer = Layer(
-            name=f'Borealis {common_name}',
+            name=f'Anim Maker {common_name}',
             type=1,
             blend=config.blend_mode,
             parent=-1,
