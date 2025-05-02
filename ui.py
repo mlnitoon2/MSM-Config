@@ -5,7 +5,7 @@ from PIL import Image
 from processor import AnimationType
 from builder import AnimationConfig
 from preview import PreviewWindow
-from typing import Callable, List, Optional
+from typing import Callable, Dict, Optional, List
 
 class AnimationCache:
     """Cache for loaded animation frames"""
