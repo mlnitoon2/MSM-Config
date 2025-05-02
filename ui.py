@@ -1,5 +1,5 @@
-import customtkinter as ctk
-from tkinter import filedialog, messagebox
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
 from PIL import Image
 from processor import AnimationType
