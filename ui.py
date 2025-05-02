@@ -440,7 +440,7 @@ class AnimationUI:
     """Main application window"""
     def __init__(self):
         self.window = tk.Tk()
-        self.window.title("Animation Manager")
+        self.window.title("Borealis & RiotLoves Custom Animation Manager")
         self.window.geometry("800x600")
         
         self._setup_ui()
