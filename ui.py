@@ -1,4 +1,5 @@
 import tkinter as tk
+import customtkinter as ctk
 from tkinter import ttk, filedialog, messagebox, Toplevel, Listbox
 from pathlib import Path
 from PIL import Image
@@ -59,8 +60,7 @@ class AnimationCache:
 
 
 class AnimationEntry:
-    """Represents a row in the animation table"""
-    def __init__(self, parent: ttk.Frame, row: int, 
+    def __init__(self, parent: ctk.CTkFrame, row: int, 
                  on_update: Callable, on_delete: Callable,
                  animation_cache: AnimationCache):
         self.parent = parent
@@ -70,168 +70,102 @@ class AnimationEntry:
         self.animation_cache = animation_cache
         self.frames: List[Image.Image] = []
 
-        self.name_var = tk.StringVar()
-        self.type_var = tk.StringVar(value=AnimationType.FOLDER.name)
-        self.source_var = tk.StringVar()
-        self.fps_var = tk.StringVar(value="30")
-        self.target_var = tk.StringVar()
-        self.position_x_var = tk.StringVar(value="0")  # Default to 5
-        self.position_y_var = tk.StringVar(value="-70")
-        self.scale_var = tk.StringVar(value="100")
-        
+        self.name_var = ctk.StringVar()
+        self.type_var = ctk.StringVar(value=AnimationType.FOLDER.name)
+        self.source_var = ctk.StringVar()
+        self.fps_var = ctk.StringVar(value="30")
+        self.target_var = ctk.StringVar()
+        self.position_x_var = ctk.StringVar(value="0")
+        self.position_y_var = ctk.StringVar(value="-70")
+        self.scale_var = ctk.StringVar(value="100")
+
         self._create_widgets()
         self._setup_bindings()
 
     def _create_widgets(self):
-        # Name entry
-        self.name_entry = ttk.Entry(
-            self.parent, textvariable=self.name_var, width=20
-        )
+        self.name_entry = ctk.CTkEntry(self.parent, textvariable=self.name_var, width=150)
         self.name_entry.grid(row=self.row, column=0, padx=2, pady=2, sticky='ew')
 
-        # Type combobox
-        self.type_combo = ttk.Combobox(
-            self.parent, 
-            textvariable=self.type_var,
-            values=[t.name for t in AnimationType],
-            state='readonly',
-            width=15
-        )
+        self.type_combo = ctk.CTkComboBox(self.parent,
+                                          variable=self.type_var,
+                                          values=[t.name for t in AnimationType],
+                                          width=140,
+                                          state='readonly')
         self.type_combo.grid(row=self.row, column=1, padx=2, pady=2, sticky='ew')
 
-        # Source frame
-        self.source_frame = ttk.Frame(self.parent)
+        self.source_frame = ctk.CTkFrame(self.parent, fg_color="transparent")
         self.source_frame.grid(row=self.row, column=2, padx=2, pady=2, sticky='ew')
 
-        # Source path entry and browse button
-        self.path_entry = ttk.Entry(
-            self.source_frame, textvariable=self.source_var
-        )
-        self.browse_btn = ttk.Button(
-            self.source_frame, text="Browse", command=self._browse_folder
-        )
+        self.path_entry = ctk.CTkEntry(self.source_frame, textvariable=self.source_var)
+        self.path_entry.grid(row=0, column=0, padx=(0,5), sticky='ew')
 
-        # Target animation combobox
-        self.target_combo = ttk.Combobox(
-            self.source_frame, 
-            textvariable=self.target_var,
-            state='readonly'
-        )
+        self.browse_btn = ctk.CTkButton(self.source_frame, text="Browse", command=self._browse_folder, width=70)
+        self.browse_btn.grid(row=0, column=1)
 
-        # FPS entry
-        self.fps_entry = ttk.Entry(
-            self.parent, textvariable=self.fps_var, width=8
-        )
+        self.target_combo = ctk.CTkComboBox(self.source_frame, variable=self.target_var, state='readonly', values=[], width=120)
+        self.target_combo.grid(row=1, column=0, columnspan=2, pady=4)
+
+        self.fps_entry = ctk.CTkEntry(self.parent, textvariable=self.fps_var, width=60)
         self.fps_entry.grid(row=self.row, column=3, padx=2, pady=2, sticky='ew')
 
-
-
-        # Frame count label
-        self.frame_count = ttk.Label(self.parent, text="0 frames")
+        self.frame_count = ctk.CTkLabel(self.parent, text="0 frames")
         self.frame_count.grid(row=self.row, column=4, padx=2, pady=2)
 
-        # Preview button
-        self.preview_btn = ttk.Button(
-            self.parent, text="P", width=3,
-            command=self._show_preview
-        )
+        self.preview_btn = ctk.CTkButton(self.parent, text="P", width=30, command=self._show_preview)
         self.preview_btn.grid(row=self.row, column=5, padx=2, pady=2)
 
-        # Delete button
-        self.delete_btn = ttk.Button(
-            self.parent, text="❌", width=3,
-            command=lambda: self.on_delete(self)
-        )
+        self.delete_btn = ctk.CTkButton(self.parent, text="❌", width=30, command=lambda: self.on_delete(self))
         self.delete_btn.grid(row=self.row, column=6, padx=2, pady=2)
-        # Replace offset entry with X/Y position entries
-        position_frame = ttk.Frame(self.parent)
-        position_frame.grid(row=self.row, column=4, padx=2, pady=2)
-        
-        # X position
-        ttk.Label(position_frame, text="X:").grid(row=0, column=0, padx=(5,0))
-        self.position_x_entry = ttk.Entry(
-            position_frame,
-            textvariable=self.position_x_var,
-            width=5
-        )
+
+        position_frame = ctk.CTkFrame(self.parent, fg_color="transparent")
+        position_frame.grid(row=self.row, column=7, padx=2, pady=2)
+
+        ctk.CTkLabel(position_frame, text="X:").grid(row=0, column=0, padx=(5, 0))
+        self.position_x_entry = ctk.CTkEntry(position_frame, textvariable=self.position_x_var, width=50)
         self.position_x_entry.grid(row=0, column=1, padx=2)
-        
-        # Y position
-        ttk.Label(position_frame, text="Y:").grid(row=0, column=2, padx=(5,0))
-        self.position_y_entry = ttk.Entry(
-            position_frame,
-            textvariable=self.position_y_var,
-            width=5
-        )
+
+        ctk.CTkLabel(position_frame, text="Y:").grid(row=0, column=2, padx=(5, 0))
+        self.position_y_entry = ctk.CTkEntry(position_frame, textvariable=self.position_y_var, width=50)
         self.position_y_entry.grid(row=0, column=3, padx=2)
 
-        # Scale
-        ttk.Label(position_frame, text="Scale %:").grid(row=0, column=4, padx=(5,0))
-        self.scale_entry = ttk.Entry(
-            position_frame,
-            textvariable=self.scale_var,
-            width=5
-        )
+        ctk.CTkLabel(position_frame, text="Scale %:").grid(row=0, column=4, padx=(5, 0))
+        self.scale_entry = ctk.CTkEntry(position_frame, textvariable=self.scale_var, width=50)
         self.scale_entry.grid(row=0, column=5, padx=2)
-
-        # Update frame count and other widgets positions
-        self.frame_count.grid(row=self.row, column=5, padx=2, pady=2)
-        self.preview_btn.grid(row=self.row, column=6, padx=2, pady=2)
-        self.delete_btn.grid(row=self.row, column=7, padx=2, pady=2)
 
         self._update_source_widgets()
 
     def _setup_bindings(self):
-        self.type_combo.bind('<<ComboboxSelected>>', 
-                           lambda _: self._update_source_widgets())
-        self.name_var.trace_add('write', lambda *_: self._on_change())
-        self.type_var.trace_add('write', lambda *_: self._on_change())
-        self.source_var.trace_add('write', lambda *_: self._on_change())
-        self.fps_var.trace_add('write', lambda *_: self._on_change())
-        self.target_var.trace_add('write', lambda *_: self._on_change())
-        self.position_x_var.trace_add('write', lambda *_: self._on_change())
-        self.position_y_var.trace_add('write', lambda *_: self._on_change())
-        self.scale_var.trace_add('write', lambda *_: self._on_change())
+        self.type_combo.bind('<<ComboboxSelected>>', lambda _: self._update_source_widgets())
+        for var in [self.name_var, self.type_var, self.source_var, self.fps_var, self.target_var,
+                    self.position_x_var, self.position_y_var, self.scale_var]:
+            var.trace_add('write', lambda *_: self._on_change())
 
     def _browse_folder(self):
-        folder = filedialog.askdirectory()
-        if folder:
-            self.source_var.set(folder)
-            # Attempt to load frames immediately
-            frames = self.animation_cache.load_if_needed(
-                self.name_var.get().strip(),
-                folder
-            )
-            self.frame_count.configure(text=f"{len(frames)} frames")
+        path = filedialog.askdirectory()
+        if path:
+            self.source_var.set(path)
+            self.frames = self.animation_cache.load_if_needed(self.name_var.get(), path)
+            self.frame_count.configure(text=f"{len(self.frames)} frames")
+            self._on_change()
 
     def _update_source_widgets(self):
-        for widget in self.source_frame.winfo_children():
-            widget.grid_remove()
-
-        anim_type = AnimationType[self.type_var.get()]
-        
-        if anim_type == AnimationType.FOLDER:
-            self.path_entry.grid(row=0, column=0, sticky='ew')
-            self.browse_btn.grid(row=0, column=1, padx=(2, 0))
-            self.source_frame.grid_columnconfigure(0, weight=1)
+        if self.type_var.get() == AnimationType.FOLDER.name:
+            self.path_entry.grid()
+            self.browse_btn.grid()
+            self.target_combo.grid_remove()
         else:
-            self.target_combo.grid(row=0, column=0, sticky='ew')
-            self.source_frame.grid_columnconfigure(0, weight=1)
+            self.path_entry.grid_remove()
+            self.browse_btn.grid_remove()
+            self.target_combo.grid()
+
+    def _on_change(self):
+        self.on_update(self)
 
     def _show_preview(self):
-        """Show animation preview window"""
-        try:
-            fps = float(self.fps_var.get())
-            if fps <= 0:
-                raise ValueError()
-        except ValueError:
-            messagebox.showerror("Error", "Invalid FPS value")
-            return
-
-        # If we already have frames, use them
+        if not self.frames and self.source_var.get():
+            self.frames = self.animation_cache.load_if_needed(self.name_var.get(), self.source_var.get())
         if self.frames:
-            PreviewWindow(self.parent.winfo_toplevel(), self.frames, fps)
-            return
+            PreviewWindow(self.frames)
 
         # Otherwise try to load frames based on type
         anim_type = AnimationType[self.type_var.get()]
