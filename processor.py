@@ -13,9 +13,9 @@ class ProcessingError(Exception):
 
 class AnimationType(Enum):
     """Type of animation source"""
-    FOLDER = auto()
-    COPY = auto()
-    FIRST_FRAME = auto()
+    FOLDER = auto() # Folder that contains all frames for an animation
+    COPY = auto() # Use frames from another Animation
+    FIRST_FRAME = auto() # Like copy, but only copies the first frame
 
 @dataclass
 class BoundingBox:
