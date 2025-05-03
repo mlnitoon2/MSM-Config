@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 from typing import List, Dict, Optional
 import glob
-
+ 
 def load_animation_frames(folder_path: str) -> List[Image.Image]:
     """Load all PNG frames from a folder"""
     folder = Path(folder_path)
