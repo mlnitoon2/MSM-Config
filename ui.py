@@ -536,7 +536,7 @@ class AnimationUI:
         # Signal that we're ready to process
         self.window.event_generate('<<ProcessAnimations>>')
 
-    def _credits():
+    def _credits(self):
         config = fetch_config_json()
         if not config or "credits" not in config:
             return
