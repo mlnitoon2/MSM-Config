@@ -1,25 +1,31 @@
 import sys
-from pathlib import Path
-from tkinter import messagebox
 import traceback
-from typing import Dict, List
 import json
+from pathlib import Path
+from typing import Dict
 
-from processor import AnimationProcessor, AnimationType, ProcessedFrame
+import customtkinter as ctk
+from tkinter import messagebox
+
+from processor import AnimationProcessor, AnimationType
 from builder import AnimationBuilder, AnimationConfig
 from compiler import Compiler
 from ui import AnimationUI
-from animation import Source, Animation, ImmediateState
+from animation import Source, Animation
 
 class AnimationManager:
-    """Main application controller"""
+    """Main application controller using CustomTkinter"""
     def __init__(self):
+        # Configure CTk
+        ctk.set_appearance_mode("Dark")
+        ctk.set_default_color_theme("blue")
+
         self.ui = AnimationUI()
         self.processor = AnimationProcessor()
         self.builder = AnimationBuilder()
         self.compiler = Compiler()
         
-        # Save reference to table for frame updates
+        # Reference to UI table
         self.table = self.ui.table
 
         # Bind processing event
@@ -35,124 +41,73 @@ class AnimationManager:
     def _on_process(self, _) -> None:
         """Handle animation processing request"""
         try:
-            # Get configurations
             configs = self.ui.get_configs()
             if not configs:
                 return
 
-            # Get and verify output path
             output_path = self.ui.get_output_path()
             if not output_path:
-                messagebox.showerror("Error", "No output path specified")
+                ctk.CTkMessagebox(title="Error", message="No output path specified", icon="cancel")  # Optional replacement
                 return
 
-            # Get common name and bin file name from UI
-            common_name = self.ui.common_name_var.get().strip()
-            bin_name = self.ui.bin_name_var.get().strip()
+            common_name = self.ui.common_name_var.get().strip() or "Animation"
+            bin_name = self.ui.bin_name_var.get().strip() or output_path.stem
 
-            # Use default names if not provided
-            if not common_name:
-                common_name = "Animation"
-            if not bin_name:
-                bin_name = output_path.stem
-
-            # Process animations
             if self._process_animations(configs, output_path, common_name, bin_name):
                 messagebox.showinfo("Success", "Animations processed successfully!")
-
         except Exception as e:
             self._handle_error("Processing Error", e)
 
     def _process_animations(self, configs: Dict[str, AnimationConfig], 
-                          output_path: Path, 
-                          common_name: str,
-                          bin_name: str) -> bool:
-        """Process and compile animations"""
+                            output_path: Path, 
+                            common_name: str,
+                            bin_name: str) -> bool:
         try:
-            # Reset builder state before starting
             self.builder.reset()
-            
-            # Reset processor state
             self.processor = AnimationProcessor()
-            
-            # First, validate all folder paths exist
+
+            # Validate folders
             for name, config in configs.items():
                 if config.type == AnimationType.FOLDER:
                     folder = Path(config.source_path)
                     if not folder.is_dir():
                         raise ValueError(f"Source folder for '{name}' not found: {folder}")
 
-            # Setup processor with configurations
             for name, config in configs.items():
-                self.processor.add_animation(
-                    name,
-                    config.type,
-                    config.source_path,
-                    config.reference_anim
-                )
+                self.processor.add_animation(name, config.type, config.source_path, config.reference_anim)
 
-            # Process all frames
             processed_frames, global_bbox = self.processor.process_all()
             if not processed_frames:
                 raise ValueError("No frames were processed")
 
-            # Update UI with processed frames for preview
             for name, frames in processed_frames.items():
                 entry = self.table.get_entry(name)
                 if entry:
                     entry.set_frames([frame.image for frame in frames])
 
-            # Setup builder with configurations
             for config in configs.values():
                 self.builder.add_animation(config)
 
-            # Calculate frame counts
             frame_counts = {name: len(frames) for name, frames in processed_frames.items()}
+            sources, animations = self.builder.build_all(frame_counts, bin_name, common_name)
 
-            # Build animation data structures using common name
-            sources, animations = self.builder.build_all(
-                frame_counts,
-                bin_name,  # Use bin_name instead of output_path.stem
-                common_name  # Pass through the common name
-            )
-
-            # Verify animations were built
             if not animations:
                 raise ValueError("No animations were built")
 
-            # Setup compiler and clean old files
             self.compiler.set_output_path(output_path)
-            self.compiler.cleanup_old_files(common_name, bin_name)  # Pass both names
+            self.compiler.cleanup_old_files(common_name, bin_name)
 
-            print("About to compile animations...")
-            print(f"Number of processed frames: {sum(len(frames) for frames in processed_frames.values())}")
-            print(f"Number of sources: {len(sources)}")
-            print(f"Number of animations: {len(animations)}")
-
-            # Compile final output using both names
             self.compiler.compile_animations(
-                processed_frames,
-                sources,
-                animations,
-                bin_name,
-                common_name,
-                global_bbox
+                processed_frames, sources, animations, bin_name, common_name, global_bbox
             )
 
-            # Check if files were created
             gfx_files = list(self.compiler.output_paths.gfx_dir.glob(f"{common_name}_*.png"))
             xml_files = list(self.compiler.output_paths.xml_dir.glob(f"{common_name}_*.xml"))
             bin_file = self.compiler.output_paths.bin_dir / f"{bin_name}.bin"
-            
-            print(f"\nVerifying output files:")
-            print(f"PNG files created: {len(gfx_files)}")
-            print(f"XML files created: {len(xml_files)}")
-            print(f"BIN file exists: {bin_file.exists()}")
 
             if not gfx_files or not xml_files or not bin_file.exists():
                 raise ValueError("Failed to create all required output files")
 
-            # Save debug information if needed
             try:
                 debug_file = output_path / 'debug_info.json'
                 debug_info = {
@@ -189,7 +144,6 @@ class AnimationManager:
                         for a in animations
                     ]
                 }
-                
                 with open(debug_file, 'w') as f:
                     json.dump(debug_info, f, indent=2)
             except Exception as e:
@@ -203,7 +157,6 @@ class AnimationManager:
             raise RuntimeError(f"Failed to process animations: {str(e)}") from e
 
     def _handle_error(self, title: str, error: Exception) -> None:
-        """Handle and display errors"""
         trace = traceback.format_exc()
         message = f"Error: {str(error)}\n\nDetails:\n{trace}"
         messagebox.showerror(title, message)
