@@ -147,7 +147,7 @@ class AnimationBuilder:
         source_map: Dict[str, Source] = {}
         processed_names = set()
         
-        # Reset counters to ensure consistent IDs
+        # Reset counters to ensure consistent IDs 
         self._source_counter = 0
         self._layer_counter = 0
         
