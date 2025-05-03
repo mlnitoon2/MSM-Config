@@ -43,7 +43,7 @@ class AnimationCache:
         if name in self.frames:
             frames = self.frames[name]
             return [frames[0]] if first_frame_only and frames else frames
-            
+             
         if ref_name and ref_name in self.frames:
             frames = self.frames[ref_name]
             if first_frame_only and frames:
