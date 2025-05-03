@@ -32,6 +32,7 @@ jobs:
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
+        git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/mlnitoon2/MSM-Config.git
         git add anim_maker_config.json
         git commit -m "Bump version to ${{ env.NEW_VERSION }}" || echo "No changes to commit"
-        git push https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/mlnitoon2/MSM-Config.git HEAD:main
+        git push origin HEAD:main
