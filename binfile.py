@@ -1,5 +1,5 @@
 from struct import pack, unpack
-from typing import BinaryIO
+from typing import BinaryIO 
 
 class BinFile:
 	WHENCE_START: int = 0
