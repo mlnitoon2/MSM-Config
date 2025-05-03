@@ -27,7 +27,6 @@ jobs:
         elif [[ "$COMMIT_MSG" == *"[MINOR]"* ]]; then
           echo "type=minor" >> $GITHUB_OUTPUT
         else
-          # Count lines changed in this commit
           LINES_CHANGED=$(git diff HEAD~1 --numstat | awk '{s+=$1+$2} END {print s}')
           if [[ $LINES_CHANGED -gt 100 ]]; then
             echo "type=major" >> $GITHUB_OUTPUT
