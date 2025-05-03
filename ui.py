@@ -375,7 +375,7 @@ class AnimationUI:
 
         self.window = ctk.CTk()
         self.window.title("Borealis & RiotLoves Custom Animation Manager")
-        self.window.geometry("1000x600")
+        self.window.geometry("1100x600")
 
         self._setup_ui()
 
