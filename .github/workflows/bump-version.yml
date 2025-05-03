@@ -17,9 +17,9 @@ jobs:
     - name: Install jq
       run: sudo apt-get install jq
 
-    - name: Bump patch version in anim_creator_config.json
+    - name: Bump patch version
       run: |
-        FILE="anim_creator_config.json"
+        FILE="anim_maker_config.json"
         VERSION=$(jq -r '.version' "$FILE")
         IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
         PATCH=$((PATCH + 1))
