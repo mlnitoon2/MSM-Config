@@ -10,14 +10,13 @@ from binfile import BinFile
 from processor import ProcessedFrame, BoundingBox
 from animation import Source, Animation
 
-
 @dataclass
 class OutputPaths:
     """Paths for output files"""
     gfx_dir: Path
     xml_dir: Path
     bin_dir: Path
-    
+
     @classmethod
     def create(cls, base_path: Path) -> 'OutputPaths':
         """Create output directories and return paths"""
@@ -26,14 +25,21 @@ class OutputPaths:
             xml_dir=base_path / 'xml_resources',
             bin_dir=base_path / 'xml_bin'
         )
-        
+
         # Create directories
         paths.gfx_dir.mkdir(parents=True, exist_ok=True)
         paths.xml_dir.mkdir(parents=True, exist_ok=True)
         paths.bin_dir.mkdir(parents=True, exist_ok=True)
-        
-        return paths
 
+        credits_path = base_path / 'credits.txt'
+        credits_text = (
+            "This animation was created using Borealis and RiotLove's custom animation maker.\n"
+            "You can download it at https://example.com to create your own animations!\n\n"
+            "PS: If you're the mod creator reading this, please place this somewhere in your mods folders. Thanks!"
+        )
+        credits_path.write_text(credits_text, encoding='utf-8')
+
+        return paths
 
 @dataclass
 class SpritesheetData:
