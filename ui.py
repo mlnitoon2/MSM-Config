@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, Toplevel
+from tkinter import ttk, filedialog, messagebox, Toplevel, Listbox
 from pathlib import Path
 from PIL import Image
 from processor import AnimationType
