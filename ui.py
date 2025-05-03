@@ -16,7 +16,7 @@ def fetch_config_json():
         response.raise_for_status()
         return response.json()
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to load config JSON:\n{e}")
+        messagebox.showerror("Error", f"Failed to load credits config:\n{e}")
         return None
 
 class AnimationCache:
