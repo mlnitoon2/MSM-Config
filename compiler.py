@@ -176,7 +176,7 @@ class Compiler:
         
         # Write watermark at the end of the file
         bf.writeInt32(0)  # Four null bytes
-        bf.writeString("created by borealis & riotlove")
+        bf.writeString("created by borealis & riotlove's msm custom animation creator")
 
         bf.close()
         
