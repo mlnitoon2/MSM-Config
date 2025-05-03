@@ -15,7 +15,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install jq
-      run: sudo apt-get install jq
+      run: sudo apt-get install -y jq
 
     - name: Bump patch version
       run: |
@@ -26,11 +26,12 @@ jobs:
         NEW_VERSION="$MAJOR.$MINOR.$PATCH"
         jq --arg v "$NEW_VERSION" '.version = $v' "$FILE" > tmp.json && mv tmp.json "$FILE"
         echo "Bumped to version $NEW_VERSION"
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
     - name: Commit and push
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
         git add anim_maker_config.json
-        git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
-        git push
+        git commit -m "Bump version to ${{ env.NEW_VERSION }}" || echo "No changes to commit"
+        git push https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/mlnitoon2/MSM-Config.git HEAD:main
