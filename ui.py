@@ -294,8 +294,7 @@ class AnimationEntry:
             self.target_var.set('')
 
 
-class AnimationTable(ttk.Frame):
-    """Main animation table widget"""
+class AnimationTable(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.animation_cache = AnimationCache()
@@ -303,23 +302,17 @@ class AnimationTable(ttk.Frame):
         self._setup_ui()
 
     def _setup_ui(self):
-        # Headers
         headers = ['Name', 'Type', 'Source/Target', 'FPS', 'Offset', 'Count', 'Preview', '']
         for i, header in enumerate(headers):
-            label = ttk.Label(self, text=header, font=('TkDefaultFont', 10, 'bold'))
+            label = ctk.CTkLabel(self, text=header, font=ctk.CTkFont(size=12, weight="bold"))
             label.grid(row=0, column=i, padx=2, pady=(0, 5), sticky='w')
 
-        # Add button
-        self.add_btn = ttk.Button(
-            self, text="Add Animation", command=self._add_entry
-        )
+        self.add_btn = ctk.CTkButton(self, text="Add Animation", command=self._add_entry)
         self.add_btn.grid(row=99, column=0, columnspan=2, pady=10, sticky='w')
 
-        # Configure grid
-        self.grid_columnconfigure(2, weight=1)  # Source column expands
+        self.grid_columnconfigure(2, weight=1)
 
     def _add_entry(self):
-        """Add a new animation entry"""
         row = len(self.entries) + 1
         entry = AnimationEntry(
             self, row,
@@ -331,9 +324,7 @@ class AnimationTable(ttk.Frame):
         self._update_references()
 
     def _delete_entry(self, entry: AnimationEntry):
-        """Delete an animation entry"""
         self.entries.remove(entry)
-        # Destroy widgets
         entry.name_entry.destroy()
         entry.type_combo.destroy()
         entry.source_frame.destroy()
@@ -341,7 +332,7 @@ class AnimationTable(ttk.Frame):
         entry.frame_count.destroy()
         entry.preview_btn.destroy()
         entry.delete_btn.destroy()
-        # Reposition remaining entries
+
         for i, e in enumerate(self.entries, start=1):
             e.row = i
             e.name_entry.grid(row=i)
@@ -354,97 +345,81 @@ class AnimationTable(ttk.Frame):
         self._update_references()
 
     def _update_references(self, _=None):
-        """Update available reference animations in all entries"""
-        folder_anims = [e.name_var.get() for e in self.entries 
-                       if e.type_var.get() == AnimationType.FOLDER.name 
-                       and e.name_var.get().strip()]
-        
+        folder_anims = [e.name_var.get() for e in self.entries
+                        if e.type_var.get() == AnimationType.FOLDER.name
+                        and e.name_var.get().strip()]
+
         for entry in self.entries:
             if entry.type_var.get() != AnimationType.FOLDER.name:
                 entry.update_target_animations(folder_anims)
 
     def get_entry(self, name: str) -> Optional[AnimationEntry]:
-        """Get entry by animation name"""
-        return next((e for e in self.entries 
-                    if e.name_var.get().strip() == name), None)
+        return next((e for e in self.entries if e.name_var.get().strip() == name), None)
 
     def get_configs(self) -> Dict[str, AnimationConfig]:
-        """Get all valid animation configurations"""
         configs = {}
         for entry in self.entries:
             config = entry.get_config()
             if config:
                 if config.name in configs:
-                    messagebox.showerror(
-                        "Error", f"Duplicate animation name: {config.name}")
+                    messagebox.showerror("Error", f"Duplicate animation name: {config.name}")
                     return {}
                 configs[config.name] = config
         return configs
 
 
 class AnimationUI:
-    """Main application window"""
     def __init__(self):
-        self.window = tk.Tk()
+        ctk.set_appearance_mode("System")
+        ctk.set_default_color_theme("blue")
+
+        self.window = ctk.CTk()
         self.window.title("Borealis & RiotLoves Custom Animation Manager")
         self.window.geometry("800x600")
-        
+
         self._setup_ui()
 
     def _setup_ui(self):
-        # Main container
-        main_frame = ttk.Frame(self.window, padding="10")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        main_frame = ctk.CTkFrame(self.window)
+        main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Animation table
         self.table = AnimationTable(main_frame)
-        self.table.pack(fill=tk.BOTH, expand=True)
+        self.table.pack(fill="both", expand=True)
 
-        # Output settings
-        settings_frame = ttk.LabelFrame(main_frame, text="Output Settings", 
-                                      padding="5")
-        settings_frame.pack(fill=tk.X, pady=(10, 0))
+        settings_frame = ctk.CTkFrame(main_frame)
+        settings_frame.pack(fill="x", pady=(10, 0))
 
-        # Common name for layers
-        common_frame = ttk.Frame(settings_frame)
-        common_frame.pack(fill=tk.X, pady=2)
-        self.common_name_var = tk.StringVar()
-        ttk.Label(common_frame, text="Common Name:").pack(side=tk.LEFT)
-        ttk.Entry(common_frame, textvariable=self.common_name_var).pack(
-            side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+        # Common name
+        common_frame = ctk.CTkFrame(settings_frame)
+        common_frame.pack(fill="x", pady=2)
+        self.common_name_var = ctk.StringVar()
+        ctk.CTkLabel(common_frame, text="Common Name:").pack(side="left")
+        ctk.CTkEntry(common_frame, textvariable=self.common_name_var).pack(
+            side="left", fill="x", expand=True, padx=(5, 0))
 
         # Bin file name
-        bin_frame = ttk.Frame(settings_frame)
-        bin_frame.pack(fill=tk.X, pady=2)
-        self.bin_name_var = tk.StringVar()
-        ttk.Label(bin_frame, text="Bin File Name:").pack(side=tk.LEFT)
-        ttk.Entry(bin_frame, textvariable=self.bin_name_var).pack(
-        side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
+        bin_frame = ctk.CTkFrame(settings_frame)
+        bin_frame.pack(fill="x", pady=2)
+        self.bin_name_var = ctk.StringVar()
+        ctk.CTkLabel(bin_frame, text="Bin File Name:").pack(side="left")
+        ctk.CTkEntry(bin_frame, textvariable=self.bin_name_var).pack(
+            side="left", fill="x", expand=True, padx=(5, 0))
 
         # Output folder
-        folder_frame = ttk.Frame(settings_frame)
-        folder_frame.pack(fill=tk.X)
-        
-        self.output_var = tk.StringVar()
-        ttk.Label(folder_frame, text="Output Folder:").pack(side=tk.LEFT)
-        ttk.Entry(folder_frame, textvariable=self.output_var).pack(
-            side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
-        ttk.Button(folder_frame, text="Browse", 
-                  command=self._browse_output).pack(side=tk.LEFT, padx=(5, 0))
+        folder_frame = ctk.CTkFrame(settings_frame)
+        folder_frame.pack(fill="x", pady=2)
+        self.output_var = ctk.StringVar()
+        ctk.CTkLabel(folder_frame, text="Output Folder:").pack(side="left")
+        ctk.CTkEntry(folder_frame, textvariable=self.output_var).pack(
+            side="left", fill="x", expand=True, padx=(5, 0))
+        ctk.CTkButton(folder_frame, text="Browse", command=self._browse_output).pack(
+            side="left", padx=(5, 0))
 
-        # Process button
-        self.process_btn = ttk.Button(
-            main_frame, text="Process Animations",
-            command=self._process
-        )
+        self.process_btn = ctk.CTkButton(main_frame, text="Process Animations", command=self._process)
         self.process_btn.pack(pady=10)
 
-        self.credits_btn = ttk.Button(
-            main_frame, text="Credits",
-            command=self._credits
-        )
+        self.credits_btn = ctk.CTkButton(main_frame, text="Credits", command=self._credits)
         self.credits_btn.pack(pady=10)
-
 
     def _browse_output(self):
         folder = filedialog.askdirectory()
@@ -461,40 +436,34 @@ class AnimationUI:
             messagebox.showerror("Error", "No output folder specified")
             return
         if not Path(output).exists():
-            if messagebox.askyesno("Create Folder", 
-                                 "Output folder doesn't exist. Create it?"):
+            if messagebox.askyesno("Create Folder", "Output folder doesn't exist. Create it?"):
                 Path(output).mkdir(parents=True)
             else:
                 return
 
-        # Signal that we're ready to process
         self.window.event_generate('<<ProcessAnimations>>')
 
     def _credits(self):
         config = fetch_config_json()
         if not config or "credits" not in config:
             return
-    
-        credits = config["credits"]
-    
+
         credits_win = Toplevel()
         credits_win.title("Credits")
         credits_win.geometry("300x200")
-    
+
         listbox = Listbox(credits_win)
         listbox.pack(fill="both", expand=True, padx=10, pady=10)
-    
-        for line in credits:
-            listbox.insert(tk.END, line)
+
+        for line in config["credits"]:
+            listbox.insert("end", line)
 
     def run(self):
         self.window.mainloop()
 
     def get_output_path(self) -> Optional[Path]:
-        """Get the selected output path"""
         path = self.output_var.get().strip()
         return Path(path) if path else None
 
     def get_configs(self) -> Dict[str, AnimationConfig]:
-        """Get all animation configurations"""
         return self.table.get_configs()
