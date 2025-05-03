@@ -1,4 +1,7 @@
 {
-  "credits": ["Created by RiotLove", "Fixed bins & overhaul by Borealis"],
-  "version": "1.0.5"
+  "credits": [
+    "Created by RiotLove",
+    "Fixed bins & overhaul by Borealis"
+  ],
+  "version": "1.0.6"
 }
