@@ -31,6 +31,6 @@ jobs:
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
-        git add anim_creator_config.json
+        git add anim_maker_config.json
         git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
         git push
