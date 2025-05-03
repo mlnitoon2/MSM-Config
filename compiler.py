@@ -147,7 +147,7 @@ class Compiler:
             sheet_data.image.save(png_path)
             
             # Create and save XML
-            gfx_path = f"gfx/bori_love/{sprite_name}.png"
+            gfx_path = f"gfx/msm_anim_creator/{sprite_name}.png"
             xml_tree = self._create_sprite_xml(name, sheet_data, gfx_path)
             xml_tree.write(xml_path, encoding='utf-8', xml_declaration=True)
             
