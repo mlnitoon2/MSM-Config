@@ -1,0 +1,36 @@
+name: Auto Bump Version
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install jq
+      run: sudo apt-get install jq
+
+    - name: Bump patch version in anim_creator_config.json
+      run: |
+        FILE="anim_creator_config.json"
+        VERSION=$(jq -r '.version' "$FILE")
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+        jq --arg v "$NEW_VERSION" '.version = $v' "$FILE" > tmp.json && mv tmp.json "$FILE"
+        echo "Bumped to version $NEW_VERSION"
+
+    - name: Commit and push
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add anim_creator_config.json
+        git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
+        git push
