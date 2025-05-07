@@ -120,7 +120,20 @@ class Compiler:
                 'pY': '0.5'
             })
             
-        return ElementTree(root)
+        tree = ElementTree(root)
+
+        xml_str = self._pretty_print(tree)
+        
+        return xml_str
+
+    def _pretty_print(self, tree: ElementTree) -> str:
+        """Pretty-print the XML tree."""
+
+        xml_str = ElementTree.tostring(tree.getroot(), 'utf-8')
+    
+        parsed = xml.dom.minidom.parseString(xml_str)
+        
+        return parsed.toprettyxml(indent="  ")
     
     def compile_animations(self, processed_frames: Dict[str, List[ProcessedFrame]],
                          sources: List[Source], animations: List[Animation],
