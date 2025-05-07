@@ -109,7 +109,7 @@ class AnimationManager:
                 raise ValueError("Failed to create all required output files")
 
             try:
-                debug_file = output_path / 'debug_info.json'
+                debug_file = output_path / "debug_DONOTSHIP" / 'creation_info.json'
                 debug_info = {
                     'common_name': common_name,
                     'bin_name': bin_name,
