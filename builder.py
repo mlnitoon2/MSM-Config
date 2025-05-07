@@ -119,7 +119,7 @@ class AnimationBuilder:
             height=size,
             anchor_x=0,
             anchor_y=0,
-            metadata='',
+            metadata='test test testicles',
             frames=self._create_frames(frame_count, config)
         )
         self._layer_counter += 1
