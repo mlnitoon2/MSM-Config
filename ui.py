@@ -162,10 +162,18 @@ class AnimationEntry:
         self.on_update(self)
 
     def _show_preview(self):
-        if not self.frames and self.source_var.get():
-            self.frames = self.animation_cache.load_if_needed(self.name_var.get(), self.source_var.get())
+        try:
+            fps = float(self.fps_var.get())
+            if fps <= 0:
+                raise ValueError()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid FPS value")
+            return
+
+        # If we already have frames, use them
         if self.frames:
-            PreviewWindow(self.frames)
+            PreviewWindow(self.parent.winfo_toplevel(), self.frames, fps)
+            return
 
         # Otherwise try to load frames based on type
         anim_type = AnimationType[self.type_var.get()]
