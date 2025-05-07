@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from enum import Enum, auto
+import random
 
 from animation import (
     Animation, Layer, Frame, Source,
@@ -9,6 +10,18 @@ from animation import (
     BlendMode, ImmediateState
 )
 from processor import AnimationType
+
+watermark = [
+    "Created using Borealis and RiotLoves' Custom Animation Creator.",
+    "Made with Borealis and RiotLoves' Custom Animation Creator.",
+    "Animated using Borealis and RiotLoves' Custom Animation Creator.",
+    "Built with Borealis and RiotLoves' Custom Animation Creator.",
+    "Produced with Borealis and RiotLoves' Custom Animation Creator.",
+    "Boreaaaaaaliiiiss",
+    "Riooootttttloooooveeeee",
+    "Anim name....",
+    "Animation name here",
+]
 
 @dataclass
 class AnimationConfig:
@@ -119,7 +132,7 @@ class AnimationBuilder:
             height=size,
             anchor_x=0,
             anchor_y=0,
-            metadata='test test testicles',
+            metadata=random.choice(watermark),
             frames=self._create_frames(frame_count, config)
         )
         self._layer_counter += 1
